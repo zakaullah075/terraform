@@ -1,0 +1,48 @@
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state-bucket-one"  # Replace with your unique S3 bucket name
+    key    = "terraform/state"            # Path within the bucket where the state file will be stored
+    region = "us-east-2"                  # AWS region where your S3 bucket is located
+  }
+}
+
+
+
+
+
+
+provider "aws" {
+  region = "us-east-2"
+}
+
+resource "aws_instance" "awan" {
+  ami           ="ami-09040d770ffe2224f"
+  instance_type = "t2.micro"
+  key_name      = "yup-key"  # Add the name of your key pair
+  tags = {
+    Name = "awan-instance"
+  }
+
+vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+
+}
+
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow inbound SSH traffic"
+
+  // Ingress rule for SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Allow SSH access from anywhere. Adjust as needed.
+  }
+}
+
+
+output "instance_ip" {
+  value = aws_instance.awan.public_ip
+}
+
+
